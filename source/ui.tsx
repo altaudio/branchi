@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import React, { FC, useEffect, useState } from "react";
-import { Text, Box, useInput } from "ink";
+import { Text, Box, useInput, useApp } from "ink";
 
 interface Branch {
 	index: number;
@@ -8,6 +8,7 @@ interface Branch {
 }
 
 const App: FC<{ name?: string }> = () => {
+	const { exit } = useApp();
 	const [branches, setBranches] = useState<Branch[]>([]);
 	const [currentBranch, setCurrentBranch] = useState<Branch | null>(null);
 	const [selectedBranches, setSelectedBranches] = useState<Branch["index"][]>(
@@ -64,6 +65,30 @@ const App: FC<{ name?: string }> = () => {
 				setSelectedBranches([...selectedBranches, currentBranch.index]);
 			}
 		}
+
+		if (input === "d") {
+			if (!selectedBranches.length) {
+				return;
+			}
+
+			const branchNames = branches
+				.filter(({ index }) => selectedBranches.includes(index))
+				.map(({ name }) => name);
+
+			const command = `git branch -D ${branchNames.join(" ")}`;
+
+			exec(command, (error, stdout, stderr) => {
+				if (error) {
+					throw error;
+				}
+				if (stderr) {
+					throw stderr;
+				}
+
+				console.log(stdout);
+				exit();
+			});
+		}
 	});
 
 	useEffect(() => {
@@ -107,7 +132,7 @@ const App: FC<{ name?: string }> = () => {
 							color={isCurrentBranch ? "yellow" : "blue"}
 							inverse={isSelected}
 						>
-							{isCurrentBranch ? <>&#62;{" "}</> : <>&nbsp; </>}
+							{isCurrentBranch ? <>&#62; </> : <>&nbsp; </>}
 							{branch.name}
 						</Text>
 					</Box>
