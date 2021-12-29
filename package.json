@@ -9,6 +9,7 @@
 	"scripts": {
 		"build": "tsc",
 		"start": "npm run build && dist/cli.js",
+		"dev": "nodemon --exec \"npm run start\" --watch source -e ts,tsx",
 		"pretest": "npm run build",
 		"test": "xo && ava"
 	},
@@ -46,6 +47,7 @@
 		"eslint-plugin-react": "^7.28.0",
 		"eslint-plugin-react-hooks": "^4.3.0",
 		"ink-testing-library": "^2.1.0",
+		"nodemon": "^2.0.15",
 		"prettier": "^2.5.1",
 		"typescript": "^4.5.4",
 		"xo": "^0.39.1"
