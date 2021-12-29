@@ -10,6 +10,9 @@ interface Branch {
 const App: FC<{ name?: string }> = () => {
 	const [branches, setBranches] = useState<Branch[]>([]);
 	const [currentBranch, setCurrentBranch] = useState<Branch | null>(null);
+	const [selectedBranches, setSelectedBranches] = useState<Branch["index"][]>(
+		[]
+	);
 
 	useInput((input, key) => {
 		if (!currentBranch) {
@@ -49,6 +52,18 @@ const App: FC<{ name?: string }> = () => {
 
 			setCurrentBranch(nextBranch);
 		}
+
+		if (input === "s") {
+			const isSelected = selectedBranches.includes(currentBranch.index);
+
+			if (isSelected) {
+				setSelectedBranches(
+					selectedBranches.filter((index) => index !== currentBranch.index)
+				);
+			} else {
+				setSelectedBranches([...selectedBranches, currentBranch.index]);
+			}
+		}
 	});
 
 	useEffect(() => {
@@ -84,14 +99,15 @@ const App: FC<{ name?: string }> = () => {
 		<>
 			{branches.map((branch) => {
 				const isCurrentBranch = branch === currentBranch;
+				const isSelected = selectedBranches.includes(branch.index);
+
 				return (
 					<Box key={branch.name}>
-						{isCurrentBranch ? (
-							<Text color="yellow">&#62; </Text>
-						) : (
-							<Text>&nbsp; </Text>
-						)}
-						<Text color={isCurrentBranch ? "yellow" : "blue"}>
+						<Text
+							color={isCurrentBranch ? "yellow" : "blue"}
+							inverse={isSelected}
+						>
+							{isCurrentBranch ? <>&#62;{" "}</> : <>&nbsp; </>}
 							{branch.name}
 						</Text>
 					</Box>
