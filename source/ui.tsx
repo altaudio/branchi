@@ -89,6 +89,34 @@ const App: FC<{ name?: string }> = () => {
 				exit();
 			});
 		}
+
+		if (input === "c") {
+			const firstSelectedIndex = selectedBranches[0];
+
+			if (firstSelectedIndex === undefined) {
+				return;
+			}
+
+			const firstBranch = branches[firstSelectedIndex];
+
+			if (!firstBranch) {
+				return;
+			}
+
+			const command = `git checkout ${firstBranch.name}`;
+
+			exec(command, (error, stdout, stderr) => {
+				if (error) {
+					throw error;
+				}
+				if (stderr) {
+					throw stderr;
+				}
+
+				console.log(stdout);
+				exit();
+			});
+		}
 	});
 
 	useEffect(() => {
