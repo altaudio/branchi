@@ -1,10 +1,55 @@
 import { exec } from "child_process";
 import React, { FC, useEffect, useState } from "react";
-import { Text, Box } from "ink";
+import { Text, Box, useInput } from "ink";
+
+interface Branch {
+	index: number;
+	name: string;
+}
 
 const App: FC<{ name?: string }> = () => {
-	const [branches, setBranches] = useState<string[]>([]);
-	const [currentBranch, setCurrentBranch] = useState<string | null>(null);
+	const [branches, setBranches] = useState<Branch[]>([]);
+	const [currentBranch, setCurrentBranch] = useState<Branch | null>(null);
+
+	useInput((input, key) => {
+		if (!currentBranch) {
+			return;
+		}
+
+		if (key.downArrow || input === "j") {
+			const currentIndex = currentBranch.index;
+			const nextIndex = currentIndex + 1;
+
+			if (nextIndex > branches.length - 1) {
+				return;
+			}
+
+			const nextBranch = branches[nextIndex];
+
+			if (!nextBranch) {
+				return;
+			}
+
+			setCurrentBranch(nextBranch);
+		}
+
+		if (key.upArrow || input === "k") {
+			const currentIndex = currentBranch.index;
+			const nextIndex = currentIndex - 1;
+
+			if (nextIndex < 0) {
+				return;
+			}
+
+			const nextBranch = branches[nextIndex];
+
+			if (!nextBranch) {
+				return;
+			}
+
+			setCurrentBranch(nextBranch);
+		}
+	});
 
 	useEffect(() => {
 		exec("git branch", (error, stdout, stderr) => {
@@ -20,6 +65,7 @@ const App: FC<{ name?: string }> = () => {
 				.split("\n")
 				.map((branch) => branch.replace(/\s/g, ""))
 				.filter((branch) => !!branch)
+				.map((branch, index) => ({ index, name: branch }))
 				.sort();
 
 			setBranches(parsedBranches);
@@ -39,13 +85,15 @@ const App: FC<{ name?: string }> = () => {
 			{branches.map((branch) => {
 				const isCurrentBranch = branch === currentBranch;
 				return (
-					<Box key={branch}>
+					<Box key={branch.name}>
 						{isCurrentBranch ? (
 							<Text color="yellow">&#62; </Text>
 						) : (
 							<Text>&nbsp; </Text>
 						)}
-						<Text color={isCurrentBranch ? "yellow" : "blue"}>{branch}</Text>
+						<Text color={isCurrentBranch ? "yellow" : "blue"}>
+							{branch.name}
+						</Text>
 					</Box>
 				);
 			})}
