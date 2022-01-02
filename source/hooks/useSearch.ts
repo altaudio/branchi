@@ -1,5 +1,6 @@
 import { BranchesContext } from "../components/BranchesProvider";
 import { useContext, useState } from "react";
+import { useInput } from "ink";
 
 function useSearch() {
 	const { branches, setFilteredBranches } = useContext(BranchesContext);
@@ -20,6 +21,12 @@ function useSearch() {
 
 		setFilteredBranches(searched);
 	};
+
+	useInput((_, key) => {
+		if (key.escape) {
+			search("");
+		}
+	});
 
 	return { search, searchTerm };
 }
