@@ -1,6 +1,7 @@
 import { exec } from "child_process";
-import React, { FC, useEffect, useState } from "react";
-import { Text, Box, useInput} from "ink";
+import { FC, useEffect, useState } from "react";
+import { Text, Box, useInput } from "ink";
+import { FullScreen } from "./components/FullScreen";
 
 interface Branch {
 	index: number;
@@ -146,7 +147,7 @@ const App: FC<{ name?: string }> = () => {
 	}, []);
 
 	return (
-		<>
+		<FullScreen>
 			{branches.map((branch) => {
 				const isCurrentBranch = branch === currentBranch;
 				const isSelected = selectedBranches.includes(branch.index);
@@ -163,7 +164,7 @@ const App: FC<{ name?: string }> = () => {
 					</Box>
 				);
 			})}
-		</>
+		</FullScreen>
 	);
 };
 
