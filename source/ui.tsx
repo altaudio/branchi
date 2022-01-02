@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import React, { FC, useEffect, useState } from "react";
-import { Text, Box, useInput, useApp } from "ink";
+import { Text, Box, useInput} from "ink";
 
 interface Branch {
 	index: number;
@@ -8,7 +8,6 @@ interface Branch {
 }
 
 const App: FC<{ name?: string }> = () => {
-	const { exit } = useApp();
 	const [branches, setBranches] = useState<Branch[]>([]);
 	const [currentBranch, setCurrentBranch] = useState<Branch | null>(null);
 	const [selectedBranches, setSelectedBranches] = useState<Branch["index"][]>(
@@ -86,7 +85,6 @@ const App: FC<{ name?: string }> = () => {
 				}
 
 				console.log(stdout);
-				exit();
 			});
 		}
 
@@ -114,7 +112,6 @@ const App: FC<{ name?: string }> = () => {
 				}
 
 				console.log(stdout);
-				exit();
 			});
 		}
 	});
