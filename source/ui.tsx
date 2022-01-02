@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import { FC, useEffect, useState } from "react";
 import { Text, Box, useInput } from "ink";
 import { FullScreen } from "./components/FullScreen";
+import { useAllBranches } from "./hooks/useAllBranches";
 
 interface Branch {
 	index: number;
@@ -9,11 +10,27 @@ interface Branch {
 }
 
 const App: FC<{ name?: string }> = () => {
-	const [branches, setBranches] = useState<Branch[]>([]);
+	const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]);
 	const [currentBranch, setCurrentBranch] = useState<Branch | null>(null);
 	const [selectedBranches, setSelectedBranches] = useState<Branch["index"][]>(
 		[]
 	);
+
+	const { branches } = useAllBranches();
+
+	const mapBranches = (branches: { name: string }[]) =>
+		branches.map(({ name }, index) => ({ name, index }));
+
+	useEffect(() => {
+		const mappedBranches = mapBranches(branches);
+
+		if (!mappedBranches[0]) {
+			return;
+		}
+
+		setFilteredBranches(mappedBranches);
+		setCurrentBranch(mappedBranches[0]);
+	}, [branches]);
 
 	useInput((input, key) => {
 		if (!currentBranch) {
@@ -24,11 +41,11 @@ const App: FC<{ name?: string }> = () => {
 			const currentIndex = currentBranch.index;
 			const nextIndex = currentIndex + 1;
 
-			if (nextIndex > branches.length - 1) {
+			if (nextIndex > filteredBranches.length - 1) {
 				return;
 			}
 
-			const nextBranch = branches[nextIndex];
+			const nextBranch = filteredBranches[nextIndex];
 
 			if (!nextBranch) {
 				return;
@@ -45,7 +62,7 @@ const App: FC<{ name?: string }> = () => {
 				return;
 			}
 
-			const nextBranch = branches[nextIndex];
+			const nextBranch = filteredBranches[nextIndex];
 
 			if (!nextBranch) {
 				return;
@@ -71,7 +88,7 @@ const App: FC<{ name?: string }> = () => {
 				return;
 			}
 
-			const branchNames = branches
+			const branchNames = filteredBranches
 				.filter(({ index }) => selectedBranches.includes(index))
 				.map(({ name }) => name);
 
@@ -96,7 +113,7 @@ const App: FC<{ name?: string }> = () => {
 				return;
 			}
 
-			const firstBranch = branches[firstSelectedIndex];
+			const firstBranch = filteredBranches[firstSelectedIndex];
 
 			if (!firstBranch) {
 				return;
@@ -117,38 +134,9 @@ const App: FC<{ name?: string }> = () => {
 		}
 	});
 
-	useEffect(() => {
-		exec("git branch", (error, stdout, stderr) => {
-			if (error) {
-				throw error;
-			}
-			if (stderr) {
-				throw stderr;
-			}
-
-			const parsedBranches = stdout
-				.replace("*", "")
-				.split("\n")
-				.map((branch) => branch.replace(/\s/g, ""))
-				.filter((branch) => !!branch)
-				.map((branch, index) => ({ index, name: branch }))
-				.sort();
-
-			setBranches(parsedBranches);
-
-			const firstBranch = parsedBranches[0];
-
-			if (!firstBranch) {
-				throw new Error("No first branch found!");
-			}
-
-			setCurrentBranch(firstBranch);
-		});
-	}, []);
-
 	return (
 		<FullScreen>
-			{branches.map((branch) => {
+			{filteredBranches.map((branch) => {
 				const isCurrentBranch = branch === currentBranch;
 				const isSelected = selectedBranches.includes(branch.index);
 
