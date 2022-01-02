@@ -13,13 +13,17 @@ interface Branch {
 }
 
 const App: FC<{ name?: string }> = () => {
-	const [currentBranch, setCurrentBranch] = useState<Branch | null>(null);
 	const [selectedBranches, setSelectedBranches] = useState<Branch["index"][]>(
 		[]
 	);
 
 	const { mode } = useModes();
-	const { filteredBranches } = useContext(BranchesContext);
+	const {
+		filteredBranches,
+		increaseCurrentIndex,
+		decreaseCurrentIndex,
+		currentBranch,
+	} = useContext(BranchesContext);
 	const { searchTerm, search } = useSearch();
 
 	useInput((input, key) => {
@@ -28,37 +32,11 @@ const App: FC<{ name?: string }> = () => {
 		}
 
 		if (key.downArrow || input === "j") {
-			const currentIndex = currentBranch.index;
-			const nextIndex = currentIndex + 1;
-
-			if (nextIndex > filteredBranches.length - 1) {
-				return;
-			}
-
-			const nextBranch = filteredBranches[nextIndex];
-
-			if (!nextBranch) {
-				return;
-			}
-
-			setCurrentBranch(nextBranch);
+			increaseCurrentIndex();
 		}
 
 		if (key.upArrow || input === "k") {
-			const currentIndex = currentBranch.index;
-			const nextIndex = currentIndex - 1;
-
-			if (nextIndex < 0) {
-				return;
-			}
-
-			const nextBranch = filteredBranches[nextIndex];
-
-			if (!nextBranch) {
-				return;
-			}
-
-			setCurrentBranch(nextBranch);
+			decreaseCurrentIndex();
 		}
 
 		if (input === "s") {
@@ -130,16 +108,15 @@ const App: FC<{ name?: string }> = () => {
 				<TextInput value={searchTerm || ""} onChange={search} />
 			)}
 			{filteredBranches.map((branch) => {
-				const isCurrentBranch = branch === currentBranch;
 				const isSelected = selectedBranches.includes(branch.index);
 
 				return (
 					<Box key={branch.name}>
 						<Text
-							color={isCurrentBranch ? "yellow" : "blue"}
+							color={branch.current ? "yellow" : "blue"}
 							inverse={isSelected}
 						>
-							{isCurrentBranch ? <>&#62; </> : <>&nbsp; </>}
+							{branch.current ? <>&#62; </> : <>&nbsp; </>}
 							{branch.name}
 						</Text>
 					</Box>
