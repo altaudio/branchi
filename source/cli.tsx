@@ -1,24 +1,26 @@
 #!/usr/bin/env node
-import {render} from 'ink';
-import meow from 'meow';
-import App from './ui';
+import { render } from "ink";
+import UI from "./ui";
 
-const cli = meow(`
-	Usage
-	  $ branchi
+// const cli = meow(
+// 	`
+// 	Usage
+// 	  $ branchi
+//
+// 	Options
+// 		--name  Your name
+//
+// 	Examples
+// 	  $ branchi --name=Jane
+// 	  Hello, Jane
+// `,
+// 	{
+// 		flags: {
+// 			name: {
+// 				type: "string",
+// 			},
+// 		},
+// 	}
+// );
 
-	Options
-		--name  Your name
-
-	Examples
-	  $ branchi --name=Jane
-	  Hello, Jane
-`, {
-	flags: {
-		name: {
-			type: 'string'
-		}
-	}
-});
-
-render(<App name={cli.flags.name}/>);
+render(<UI />);
