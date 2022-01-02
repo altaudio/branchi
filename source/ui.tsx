@@ -3,6 +3,8 @@ import { FC, useEffect, useState } from "react";
 import { Text, Box, useInput } from "ink";
 import { FullScreen } from "./components/FullScreen";
 import { useAllBranches } from "./hooks/useAllBranches";
+import { Mode, useModes } from "./hooks/useModes";
+import TextInput from "ink-text-input";
 
 interface Branch {
 	index: number;
@@ -15,6 +17,31 @@ const App: FC<{ name?: string }> = () => {
 	const [selectedBranches, setSelectedBranches] = useState<Branch["index"][]>(
 		[]
 	);
+	const [searchTerm, setSearchTerm] = useState<string | null>(null);
+
+	const search = (term: string) => {
+		if (!term) {
+			setSearchTerm(null);
+		}
+
+		const parsedTerm = term.toLowerCase();
+
+		setSearchTerm(parsedTerm);
+
+		const filtered = branches.filter(({ name }) =>
+			name.toLowerCase().includes(parsedTerm)
+		);
+
+		const mappedBranches = mapBranches(filtered);
+		setFilteredBranches(mappedBranches);
+
+		const firstResult = mappedBranches[0];
+		if (firstResult) {
+			setCurrentBranch(firstResult);
+		}
+
+		setSelectedBranches([]);
+	};
 
 	const { branches } = useAllBranches();
 
@@ -31,6 +58,8 @@ const App: FC<{ name?: string }> = () => {
 		setFilteredBranches(mappedBranches);
 		setCurrentBranch(mappedBranches[0]);
 	}, [branches]);
+
+	const { mode } = useModes();
 
 	useInput((input, key) => {
 		if (!currentBranch) {
@@ -136,6 +165,9 @@ const App: FC<{ name?: string }> = () => {
 
 	return (
 		<FullScreen>
+			{mode === Mode.Search && (
+				<TextInput value={searchTerm || ""} onChange={search} />
+			)}
 			{filteredBranches.map((branch) => {
 				const isCurrentBranch = branch === currentBranch;
 				const isSelected = selectedBranches.includes(branch.index);
